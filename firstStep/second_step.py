@@ -1,10 +1,7 @@
-# for reading all files
-from os import listdir
-from os.path import isfile, join
 from collections import Counter
+from sklearn import svm
 
-from common import *
-
+from firstStep.common import *
 
 def get_words_from(articles, path_to_articles):
     counter = Counter()
@@ -21,14 +18,14 @@ def get_words_from(articles, path_to_articles):
     return counter
 
 
-def main(path_to_articles, learn_count=100, classify_count=1000, space=400):
-    articles = [file for file in listdir(path_to_articles) if isfile(join(path_to_articles, file))]
+def main(path_to_articles_crimes, path_to_guardian_not_crimes, learn_count=100, classify_count=1000, space=400):
+    articles = get_files_from(path_to_articles_crimes)
 
     articles_to_learn = articles[:learn_count]
-    articles_to_classify = articles[learn_count:classify_count]
+    articles_to_classify = articles[learn_count:(learn_count + classify_count)]
 
     # get words and their freq
-    counter = get_words_from(articles_to_learn, path_to_articles)
+    counter = get_words_from(articles_to_learn, path_to_articles_crimes)
 
     # make features
     i = 0
@@ -40,32 +37,49 @@ def main(path_to_articles, learn_count=100, classify_count=1000, space=400):
     print(feature_space)
 
     # transform articles to vectors in our feature space
-    article_vectors = []
-    for article_file in articles_to_learn:
-        article_file = open(join(path_to_articles, article_file), 'r', encoding='utf8')
+    article_crimes_vectors = []
+    for article_crime_file in articles_to_learn:
+        article_file = open(join(path_to_articles_crimes, article_crime_file), 'r', encoding='utf8')
         text = article_file.read()
 
-        article_vector = [0] * space
+        article_crime_vector = [0] * space
 
         for word in prepare_words_from(text):
             if word in feature_space:
-                article_vector[feature_space[word]] += 1
+                article_crime_vector[feature_space[word]] += 1
 
-        article_vectors.append(article_vector)
+        article_crimes_vectors.append(article_crime_vector)
 
-    # find center mass of learning articles
-    center = center_of_mass(article_vectors)
+    articles = get_files_from(path_to_guardian_not_crimes)
+    articles_to_learn = articles[:learn_count]
 
-    # metrics
+    article_not_crimes_vectors = []
+    for article_not_crime_file in articles_to_learn:
+        article_file = open(join(path_to_guardian_not_crimes, article_not_crime_file), 'r', encoding='utf8')
+        text = article_file.read()
+
+        article_not_crime_vector = [0] * space
+
+        for word in prepare_words_from(text):
+            if word in feature_space:
+                article_not_crime_vector[feature_space[word]] += 1
+
+        article_not_crimes_vectors.append(article_not_crime_vector)
+
+    classifier = svm.SVC()
+    X = []
+    X.extend(article_crimes_vectors)
+    X.extend(article_not_crimes_vectors)
+
+    Y = [0] * (len(article_crimes_vectors))
+    Y.extend([1] * len(article_not_crimes_vectors))
+    print(X)
+    print(Y)
+    classifier.fit(X, Y)
+
     success_count = 0
-    max_dist = -9999999999999999
-    for article_vector in article_vectors:
-        cur_dist = dist_between(article_vector, center)
-        if cur_dist > max_dist:
-            max_dist = cur_dist
-
     for article_file in articles_to_classify:
-        article_file = open(join(path_to_articles, article_file), 'r', encoding='utf8')
+        article_file = open(join(path_to_guardian_crimes, article_file), 'r', encoding='utf8')
 
         text = article_file.read()
         article_vector = [0] * space
@@ -74,7 +88,10 @@ def main(path_to_articles, learn_count=100, classify_count=1000, space=400):
             if word in feature_space:
                 article_vector[feature_space[word]] += 1
 
-        if dist_between(article_vector, center) < max_dist:
+        print(classifier.predict(article_vector))
+        if classifier.predict(article_vector)[0] == 0:
             success_count += 1
 
-main(path_to_guardian, articles_learn_count, articles_to_classify)
+    print(success_count / classify_count * 100)
+
+main(path_to_guardian_crimes, path_to_guardian_not_crimes, articles_learn_count, articles_classify_count)

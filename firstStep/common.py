@@ -4,12 +4,16 @@ from nltk.corpus import stopwords
 from nltk import word_tokenize
 from nltk.stem.porter import PorterStemmer
 
+from os import listdir
+from os.path import isfile, join
+
 import string
 
 path_to_reuters = 'reuters21578'
-path_to_guardian = 'data_set'
+path_to_guardian_crimes = join('..' ,'the_guardian_com', 'crimes')
+path_to_guardian_not_crimes = join('..', 'the_guardian_com', 'not_crimes')
 articles_learn_count = 100
-articles_to_classify = 10000
+articles_classify_count = 10000
 
 
 def is_number(str):
@@ -54,3 +58,7 @@ def center_of_mass(points):
 
 def dist_between(point_1, point_2):
     return distance.euclidean(point_1, point_2)
+
+
+def get_files_from(directory):
+    return [file for file in listdir(directory) if isfile(join(directory, file))]

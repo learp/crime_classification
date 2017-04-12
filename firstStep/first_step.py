@@ -3,11 +3,11 @@ from os import listdir
 from os.path import isfile, join
 from collections import Counter
 
-from common import *
+from firstStep.common import *
 
 
 def main(path_to_articles, learn_count, classify_count):
-    articles = [file for file in listdir(path_to_articles) if isfile(join(path_to_articles, file))]
+    articles = get_files_from(path_to_articles)
 
     # for file in reuters:
     #     file = open(join(path_to_reuters, file))
@@ -91,4 +91,4 @@ def main(path_to_articles, learn_count, classify_count):
 
     print(success_count / classify_count * 100)
 
-main(path_to_guardian, articles_learn_count, articles_to_classify)
+main(path_to_guardian_crimes, articles_learn_count, articles_classify_count)
