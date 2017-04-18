@@ -1,7 +1,8 @@
 from collections import Counter
 from sklearn import svm
 
-from firstStep.common import *
+from classificators.common import *
+
 
 def get_words_from(articles, path_to_articles):
     counter = Counter()
@@ -18,14 +19,14 @@ def get_words_from(articles, path_to_articles):
     return counter
 
 
-def main(path_to_articles_crimes, path_to_guardian_not_crimes, learn_count=100, classify_count=1000, space=400):
-    articles = get_files_from(path_to_articles_crimes)
+def main(path_to_crime_articles, path_to_not_crime_articles, learn_count=100, classify_count=1000, space=400):
+    articles = get_files_from(path_to_crime_articles)
 
     articles_to_learn = articles[:learn_count]
     articles_to_classify = articles[learn_count:(learn_count + classify_count)]
 
     # get words and their freq
-    counter = get_words_from(articles_to_learn, path_to_articles_crimes)
+    counter = get_words_from(articles_to_learn, path_to_crime_articles)
 
     # make features
     i = 0
@@ -39,7 +40,7 @@ def main(path_to_articles_crimes, path_to_guardian_not_crimes, learn_count=100, 
     # transform articles to vectors in our feature space
     article_crimes_vectors = []
     for article_crime_file in articles_to_learn:
-        article_file = open(join(path_to_articles_crimes, article_crime_file), 'r', encoding='utf8')
+        article_file = open(join(path_to_crime_articles, article_crime_file), 'r', encoding='utf8')
         text = article_file.read()
 
         article_crime_vector = [0] * space
@@ -50,12 +51,12 @@ def main(path_to_articles_crimes, path_to_guardian_not_crimes, learn_count=100, 
 
         article_crimes_vectors.append(article_crime_vector)
 
-    articles = get_files_from(path_to_guardian_not_crimes)
+    articles = get_files_from(path_to_not_crime_articles)
     articles_to_learn = articles[:learn_count]
 
     article_not_crimes_vectors = []
     for article_not_crime_file in articles_to_learn:
-        article_file = open(join(path_to_guardian_not_crimes, article_not_crime_file), 'r', encoding='utf8')
+        article_file = open(join(path_to_not_crime_articles, article_not_crime_file), 'r', encoding='utf8')
         text = article_file.read()
 
         article_not_crime_vector = [0] * space

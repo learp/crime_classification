@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup, SoupStrainer
 
-from firstStep.common import *
+from classificators.common import *
 
 import urllib.request
 import codecs
