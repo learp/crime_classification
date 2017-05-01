@@ -1,16 +1,17 @@
 from sklearn.naive_bayes import GaussianNB
-from classificators.svm import get_words_from
 
 from classificators.common import *
 
 
-def main(path_to_crime_articles, path_to_not_crime_articles, learn_count, classify_count, space=400):
-    articles = get_files_from(path_to_crime_articles)
+def bayes(crime_documents, not_crime_documents, learn_count, classify_count, space=400):
+    print("bayes started")
+    crime_documents_to_learn = crime_documents[:learn_count]
+    not_crime_documents_to_learn = not_crime_documents[:learn_count]
 
-    articles_to_learn = articles[:learn_count]
+    # get words and their freq
+    counter = get_words_from(crime_documents_to_learn)
 
-    counter = get_words_from(articles_to_learn, path_to_crime_articles)
-
+    print("make feature space...")
     i = 0
     feature_space = dict()
     for (word, count) in counter.most_common(space):
@@ -19,80 +20,55 @@ def main(path_to_crime_articles, path_to_not_crime_articles, learn_count, classi
 
     print(feature_space)
 
-    article_crimes_vectors = []
-    for article_crime_file in articles_to_learn:
-        article_file = open(join(path_to_crime_articles, article_crime_file), 'r', encoding='utf8')
-        text = article_file.read()
+    print("transforming documents into feature space...")
+    idf_vector = form_idf_vector(feature_space, crime_documents_to_learn + not_crime_documents_to_learn)
 
-        article_crime_vector = [0] * space
+    crime_vectors = tf_idf_all_with_idf_vector(feature_space, crime_documents_to_learn, idf_vector)
+    not_crime_vectors = tf_idf_all_with_idf_vector(feature_space, not_crime_documents_to_learn, idf_vector)
+    #crime_vectors = tf_normalize_all(feature_space, crime_documents_to_learn)
+    #not_crime_vectors = tf_normalize_all(feature_space, not_crime_documents_to_learn)
 
-        for word in prepare_words_from(text):
-            if word in feature_space:
-                article_crime_vector[feature_space[word]] += 1
-
-        article_crimes_vectors.append(article_crime_vector)
-
-    articles = get_files_from(path_to_not_crime_articles)
-    articles_to_learn = articles[:learn_count]
-
-    article_not_crimes_vectors = []
-    for article_not_crime_file in articles_to_learn:
-        article_file = open(join(path_to_not_crime_articles, article_not_crime_file), 'r', encoding='utf8')
-        text = article_file.read()
-
-        article_not_crime_vector = [0] * space
-
-        for word in prepare_words_from(text):
-            if word in feature_space:
-                article_not_crime_vector[feature_space[word]] += 1
-
-        article_not_crimes_vectors.append(article_not_crime_vector)
+    print("documents transformed successfully!")
 
     classifier = GaussianNB()
 
     X = []
-    X.extend(article_crimes_vectors)
-    X.extend(article_not_crimes_vectors)
+    X.extend(crime_vectors)
+    X.extend(not_crime_vectors)
 
-    Y = [0] * (len(article_crimes_vectors))
-    Y.extend([1] * len(article_not_crimes_vectors))
+    Y = [0] * (len(crime_vectors))
+    Y.extend([1] * len(not_crime_vectors))
 
+    print("bayes learning...")
     classifier.fit(X, Y)
+    print("bayes ready to classify!")
 
     success_count = 0
-    articles_to_classify = get_files_from(path_to_crime_articles)[learn_count:(learn_count + int(classify_count/2))]
-    for article_file in articles_to_classify:
-        article_file = open(join(path_to_crime_articles, article_file), 'r', encoding='utf8')
+    documents_to_classify = crime_documents[learn_count:(learn_count + classify_count)]
 
-        text = article_file.read()
-        article_vector = [0] * space
+    print("classifying crime documents...")
+    for document in documents_to_classify:
+        #article_vector = tf_normalize(feature_space, document)
+        article_vector = tf_idf(feature_space, document, idf_vector)
 
-        for word in prepare_words_from(text):
-            if word in feature_space:
-                article_vector[feature_space[word]] += 1
-
-        print(classifier.predict(article_vector))
-        if classifier.predict(article_vector)[0] == 0:
+        if classifier.predict(np.array(article_vector).reshape(1, -1))[0] == 0:
             success_count += 1
 
-    print(success_count / int(classify_count/2) * 100)
+    print(success_count / classify_count * 100)
 
+    print("classifying not crime documents...")
     success_count = 0
-    articles_to_classify = get_files_from(path_to_not_crime_articles)[:int(classify_count/2)]
-    for article_file in articles_to_classify:
-        article_file = open(join(path_to_not_crime_articles, article_file), 'r', encoding='utf8')
+    documents_to_classify = not_crime_documents[learn_count:(learn_count + classify_count)]
+    for document in documents_to_classify:
+        #article_vector = tf_normalize(feature_space, document)
+        article_vector = tf_idf(feature_space, document, idf_vector)
 
-        text = article_file.read()
-        article_vector = [0] * space
-
-        for word in prepare_words_from(text):
-            if word in feature_space:
-                article_vector[feature_space[word]] += 1
-
-        print(classifier.predict(article_vector))
-        if classifier.predict(article_vector)[0] != 0:
+        if classifier.predict(np.array(article_vector).reshape(1, -1))[0] != 0:
             success_count += 1
 
-    print(success_count / int(classify_count/2) * 100)
+    print(success_count / classify_count * 100)
 
-main(path_to_guardian_crimes, path_to_guardian_not_crimes, articles_learn_count, articles_classify_count)
+bayes(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count)
+
+# 99.3
+# 76.0
