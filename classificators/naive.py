@@ -36,11 +36,11 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
             max_dist = cur_dist
 
     print(max_dist)
-    max_dist = np.percentile(distances, 90)
+#    max_dist = np.percentile(distances, 50)
     print(max_dist)
 
     print("naive ready!")
-    # like ellipse (should be better)
+    # max coord (should be better)
     # max_remoteness = [0] * space
     # for article_vector in article_vectors:
     #     diff = [abs(i - j) for i, j in zip(article_vector, center)]
@@ -49,7 +49,10 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
 
     #print(max_remoteness)
 
-    success_count = 0
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
     documents_to_classify = crime_documents[learn_count:(learn_count + classify_count)]
 
     print("classifying crime documents...")
@@ -58,11 +61,10 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
 
         if dist_between(article_vector, center) < max_dist:
         # if is_less(article_vector, max_remoteness):
-            success_count += 1
+            tp += 1
+        else:
+            fp += 1
 
-    print(success_count / classify_count * 100)
-
-    success_count = 0
     documents_to_classify = not_crime_documents[learn_count:(learn_count + classify_count)]
     print("classifying not crime documents...")
     for document in documents_to_classify:
@@ -70,13 +72,21 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
 
         if dist_between(article_vector, center) >= max_dist:
         #if not is_less(article_vector, max_remoteness):
-            success_count += 1
+            tn += 1
+        else:
+            fn += 1
 
-    print(success_count / classify_count * 100)
+    print("TP: ", tp)
+    print("FP: ", fp)
+    print("TN: ", tn)
+    print("FN: ", fn)
+
+    precision = tp/(tp + fp)
+    TPR = tp/(tp + fn)
+
+    print("Precision: ", precision)
+    print("FPR: ", fp/(fp + tn))
+    print("TPR: ", TPR)
+    print("F-measure: ", 2*precision*TPR/(precision + TPR))
 
 naive(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count)
-
-# Получился интересный результат (обучение - 1000, классификация - 10000):
-#   если шар, то отлично определяются криминальные статьи (99%), но этот алгоритм считает и некриминальные статьи криминальными (около 0.32%)
-#   если элдипс, то хорошо определяются криминальные статьи (79%), некриминальные - 20%
-# переделать на процент слов, а не кол-во

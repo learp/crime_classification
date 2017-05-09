@@ -19,7 +19,7 @@ path_to_guardian_crimes = join('..', 'the_guardian_com', 'crimes')
 path_to_guardian_not_crimes = join('..', 'the_guardian_com', 'not_crimes')
 
 articles_learn_count = 100
-articles_classify_count = 1000
+articles_classify_count = 8000
 
 
 def is_number(str):
@@ -63,7 +63,9 @@ def center_of_mass(points):
 
 
 def dist_between(point_1, point_2):
-    return distance.hamming(point_1, point_2)#distance.euclidean(point_1, point_2)
+    #return distance.cosine(point_1, point_2)
+    #return distance.hamming(point_1, point_2)
+    return distance.euclidean(point_1, point_2)
 
 
 def get_files_from(directory):

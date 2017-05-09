@@ -21,8 +21,8 @@ def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count,
     print(feature_space)
 
     print("transforming documents into feature space...")
-    crime_vectors = tf_normalize_all(feature_space, crime_documents_to_learn)
-    not_crime_vectors = tf_normalize_all(feature_space, not_crime_documents_to_learn)
+    crime_vectors = tf_all(feature_space, crime_documents_to_learn)
+    not_crime_vectors = tf_all(feature_space, not_crime_documents_to_learn)
 
     print("documents transformed successfully!")
 
@@ -37,27 +37,42 @@ def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count,
     classifier.fit(X, Y)
     print("k-nearest ready to classify!")
 
-    success_count = 0
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
     documents_to_classify = crime_documents[learn_count:(learn_count + classify_count)]
 
     print("classifying crime documents...")
     for document in documents_to_classify:
-        article_vector = tf_normalize(feature_space, document)
+        article_vector = tf(feature_space, document)
 
         if classifier.predict(np.array(article_vector).reshape(1, -1))[0] == 0:
-            success_count += 1
+            tp += 1
+        else:
+            fp += 1
 
-    print(success_count / classify_count * 100)
-
-    success_count = 0
     documents_to_classify = not_crime_documents[learn_count:(learn_count + classify_count)]
     print("classifying not crime documents...")
     for document in documents_to_classify:
-        article_vector = tf_normalize(feature_space, document)
+        article_vector = tf(feature_space, document)
 
         if classifier.predict(np.array(article_vector).reshape(1, -1))[0] != 0:
-            success_count += 1
+            tn += 1
+        else:
+            fn += 1
 
-    print(success_count / classify_count * 100)
+    print("TP: ", tp)
+    print("FP: ", fp)
+    print("TN: ", tn)
+    print("FN: ", fn)
 
-k_nearest(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count)
+    precision = tp/(tp + fp)
+    TPR = tp/(tp + fn)
+
+    print("Precision: ", precision)
+    print("FPR: ", fp/(fp + tn))
+    print("TPR: ", TPR)
+    print("F-measure: ", 2*precision*TPR/(precision + TPR))
+
+k_nearest(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count, 1000)
