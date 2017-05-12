@@ -18,7 +18,7 @@ path_to_reuters = 'reuters21578'
 path_to_guardian_crimes = join('..', 'the_guardian_com', 'crimes')
 path_to_guardian_not_crimes = join('..', 'the_guardian_com', 'not_crimes')
 
-articles_learn_count = 100
+articles_learn_count = 10000
 articles_classify_count = 8000
 
 

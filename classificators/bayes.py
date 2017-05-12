@@ -14,7 +14,7 @@ def bayes(crime_documents, not_crime_documents, learn_count, classify_count, spa
     print("make feature space...")
     i = 0
     feature_space = dict()
-    for (word, count) in counter.most_common(space):
+    for (word, count) in counter.most_common(len(counter)):
         feature_space[word] = i
         i += 1
 

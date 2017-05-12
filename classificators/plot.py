@@ -1,21 +1,68 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import svm, datasets
+import random
+import classificators.common as cm
+import classificators.bayes as bayes
+import classificators.svm as svm
+import classificators.k_nearest as k_near
+
+
+svm.support_vector_machine(cm.crime_articles, cm.not_crime_articles, 101, 8000, space=1000)
+bayes.bayes(cm.crime_articles, cm.not_crime_articles, 101, 8000, space=1000)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, 101, 8000, space=1000)
+
 
 # import some data to play with
-iris = datasets.load_iris()
-X = iris.data[:(2 * len(iris.target)/3), :2]  # we only take the first two features. We could
-                      # avoid this ugly slicing by using a two-dim dataset
-y = iris.target[:(2 * len(iris.target)/3)]
+# iris = datasets.load_iris()
+#
+# X = iris.data[:(1 * len(iris.target)/3), :2]
+#
+# y = iris.target[:(1 * len(iris.target)/3)]
+#
+# center = 5
+#
+# r = 1
+#
+# X = list(np.arange(4, 6.03, 0.1))
+# Y = []
+#
+#
+# for x in X:
+#     Y.append(center + np.sqrt(r ** 2 - (x-center) ** 2))
+# for x in X:
+#     Y.append(center - np.sqrt(r ** 2 - (x-center) ** 2))
+#
+# X = X + X
+#
+# h = .02  # step size in the mesh
+#
+# # create a mesh to plot in
+# x_min, x_max = min(X) - 1, max(X) + 1
+# y_min, y_max = min(Y) - 1, max(Y) + 1
+# xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+#                      np.arange(y_min, y_max, h))
+#
+# c = [0] * len(X)
+#
+#
+# tmp = []
+#
+# i = 0
+#
+# while (i < 30):
+#     tmp.append(random.random() + 4.5)
+#     i += 1
+#
+# for x in tmp:
+#     y = random.random() + 4.5
+#     Y.append(y)
+#
+# X = X + tmp
+#
+# c = c + [1]*len(tmp)
+#
+# plt.scatter(X, Y, c=c, cmap=plt.cm.coolwarm)
+#
+# plt.show()
 
-h = .02  # step size in the mesh
 
-# create a mesh to plot in
-x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
-                     np.arange(y_min, y_max, h))
-
-plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.coolwarm)
-
-plt.show()
