@@ -8,15 +8,13 @@ def support_vector_machine(crime_documents, not_crime_documents, learn_count, cl
     crime_documents_to_learn = crime_documents[:learn_count]
     not_crime_documents_to_learn = not_crime_documents[:learn_count]
 
-    print(not_crime_documents_to_learn)
-
     # get words and their freq
-    counter = get_words_from(crime_documents_to_learn)
+    counter = get_words_from(crime_documents_to_learn + not_crime_documents)
 
     print("make feature space...")
     i = 0
     feature_space = dict()
-    for (word, count) in counter.most_common(space):
+    for (word, count) in counter.most_common(len(counter)):
         feature_space[word] = i
         i += 1
 
