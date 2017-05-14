@@ -14,7 +14,7 @@ def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count,
     print("make feature space...")
     i = 0
     feature_space = dict()
-    for (word, count) in counter.most_common(space):
+    for (word, count) in counter.most_common(len(counter)):
         feature_space[word] = i
         i += 1
 
@@ -26,7 +26,7 @@ def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count,
 
     print("documents transformed successfully!")
 
-    classifier = KNeighborsClassifier()
+    classifier = KNeighborsClassifier(metric='euclidean')
     X = []
     X.extend(crime_vectors)
     X.extend(not_crime_vectors)

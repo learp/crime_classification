@@ -19,7 +19,7 @@ path_to_guardian_crimes = join('..', 'the_guardian_com', 'crimes')
 path_to_guardian_not_crimes = join('..', 'the_guardian_com', 'not_crimes')
 
 articles_learn_count = 100
-articles_classify_count = 8000
+articles_classify_count = 7400
 
 
 def is_number(str):
@@ -36,6 +36,7 @@ def prepare_words_from(text):
              word not in stop_words and
              word not in string.punctuation and
              not is_number(word) and
+             word.isalpha() and
              len(word) > 2]
 
     stemmer = PorterStemmer()
@@ -63,9 +64,9 @@ def center_of_mass(points):
 
 
 def dist_between(point_1, point_2):
-    #return distance.cosine(point_1, point_2)
+    return distance.cosine(point_1, point_2)
     #return distance.hamming(point_1, point_2)
-    return distance.euclidean(point_1, point_2)
+    #return distance.euclidean(point_1, point_2)
 
 
 def get_files_from(directory):
@@ -78,15 +79,20 @@ def is_less(vector1, vector2):
 
     i = 0
     while i < len(vector1):
-        if vector1[i] >= vector2[i]:
+        if vector1[i] > vector2[i]:
             return False
         i += 1
 
     return True
 
+word_from_document = dict()
+
 
 def tf(feature_space, document):
-    words = prepare_words_from(document)
+    if not (document in word_from_document):
+        word_from_document[document] = prepare_words_from(document)
+
+    words = word_from_document[document]
     vector = [0] * len(feature_space)
 
     for word in words:
@@ -105,7 +111,10 @@ def tf_all(feature_space, documents):
 
 
 def tf_normalize(feature_space, document):
-    words = prepare_words_from(document)
+    if not (document in word_from_document):
+        word_from_document[document] = prepare_words_from(document)
+
+    words = word_from_document[document]
     vector = [0] * len(feature_space)
 
     for word in words:
@@ -126,7 +135,10 @@ def tf_normalize_all(feature_space, documents):
 def idf(term, documents):
     count_where_term_found = 0
     for document in documents:
-        if term in prepare_words_from(document):
+        if not (document in word_from_document):
+            word_from_document[document] = prepare_words_from(document)
+
+        if term in word_from_document[document]:
             count_where_term_found += 1
 
     return np.log2(len(documents) / count_where_term_found)
@@ -160,7 +172,7 @@ def tf_idf_all(feature_space, documents):
     for document in documents:
         tf_vector = tf_normalize(feature_space, document)
 
-        res.append(map(lambda x, y: x * y, idf_vector, tf_vector))
+        res.append(list(map(lambda x, y: x * y, idf_vector, tf_vector)))
 
     return res
 
@@ -170,7 +182,7 @@ def tf_idf_all_with_idf_vector(feature_space, documents, idf_vector):
     for document in documents:
         tf_vector = tf_normalize(feature_space, document)
 
-        res.append(map(lambda x, y: x * y, idf_vector, tf_vector))
+        res.append(list(map(lambda x, y: x * y, idf_vector, tf_vector)))
 
     return res
 
@@ -178,13 +190,23 @@ def tf_idf_all_with_idf_vector(feature_space, documents, idf_vector):
 def tf_idf(feature_space, document, idf_vector):
     tf_vector = tf_normalize(feature_space, document)
 
-    return map(lambda x, y: x * y, idf_vector, tf_vector)
+    return list(map(lambda x, y: x * y, idf_vector, tf_vector))
+
+
+def tf_idf_word(document, documents, feature_space):
+    t = tf_normalize(feature_space, document)
+    i = form_idf_vector(feature_space, documents)
+
+    return list(map(lambda x, y: x * y, t, i))
 
 
 def get_words_from(documents):
     counter = Counter()
 
     for document in documents:
-        counter += Counter(prepare_words_from(document))
+        if not (document in word_from_document):
+            word_from_document[document] = prepare_words_from(document)
+
+        counter += Counter(word_from_document[document])
 
     return counter
