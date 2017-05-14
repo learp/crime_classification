@@ -55,12 +55,18 @@ def parse_and_save(url, number_of_pages, directory_to_write):
 
         i += 1
 
+        while (str(i) + ".txt") in files:
+            i += 1
+
         try:
             article = get_article_from_link(link)
             save_article_to_file(article, str(i) + ".txt", directory_to_write)
         except Exception as e:
             print(e.strerror)
 
-#parse_and_save("https://www.theguardian.com/uk/ukcrime?page=", 734, join("..", "the_guardian_com", "crimes"))
-parse_and_save("https://www.theguardian.com/lifeandstyle?page=", 300, join("..", "the_guardian_com", "not_crimes"))
-parse_and_save("https://www.theguardian.com/technology?page=", 300, join("..", "the_guardian_com", "not_crimes"))
+#parse_and_save("https://www.theguardian.com/uk/ukcrime?page=", 734, join("..", "the_guardian_com", "crimes"))#
+#parse_and_save("https://www.theguardian.com/lifeandstyle?page=", 300, join("..", "the_guardian_com", "not_crimes"))
+#parse_and_save("https://www.theguardian.com/technology?page=", 300, join("..", "the_guardian_com", "not_crimes"))
+#parse_and_save("https://www.theguardian.com/uk/sport?page=", 400, join("..", "the_guardian_com", "not_crimes"))
+#parse_and_save("https://www.theguardian.com/uk/culture?page=", 1000, join("..", "the_guardian_com", "not_crimes"))
+parse_and_save("https://www.theguardian.com/uk/environment?page=", 1000, join("..", "the_guardian_com", "not_crimes"))

@@ -31,7 +31,7 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
     distances = []
     for crime_vector in crime_vectors:
         cur_dist = dist_between(crime_vector, center)
-        distances.append(cur_dist)
+        #distances.append(cur_dist)
         if cur_dist > max_dist:
             max_dist = cur_dist
 
