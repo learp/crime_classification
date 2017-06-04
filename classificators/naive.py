@@ -1,7 +1,7 @@
 from classificators.common import *
 
 
-def naive(crime_documents, not_crime_documents, learn_count, classify_count, space=400):
+def naive(crime_documents, not_crime_documents, learn_count, classify_count, space=3000):
     print("naive started")
     crime_documents_to_learn = crime_documents[:learn_count]
     not_crime_documents_to_learn = not_crime_documents[:learn_count]
@@ -12,16 +12,16 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
     print("make feature space...")
     i = 0
     feature_space = dict()
-    for (word, count) in counter.most_common(len(counter)):
+    for (word, count) in counter.most_common(space):
         feature_space[word] = i
         i += 1
 
     print(feature_space)
 
-    idf_vector = form_idf_vector(feature_space, crime_documents_to_learn)
+    #idf_vector = form_idf_vector(feature_space, crime_documents_to_learn + not_crime_documents_to_learn)
 
     print("transforming documents into feature space...")
-    crime_vectors = tf_idf_all_with_idf_vector(feature_space, crime_documents_to_learn, idf_vector)
+    crime_vectors = tf_normalize_all(feature_space, crime_documents_to_learn)
 
     print("documents transformed successfully!")
 
@@ -33,15 +33,15 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
     # distances = []
     # for crime_vector in crime_vectors:
     #     cur_dist = dist_between(crime_vector, center)
-    #     #distances.append(cur_dist)
+    #     distances.append(cur_dist)
     #     if cur_dist > max_dist:
     #         max_dist = cur_dist
-
+    #
     # print(max_dist)
-#     max_dist = np.percentile(distances, 50)
-#     print(max_dist)
+    # #max_dist = np.percentile(distances, 50)
+    # print(max_dist)
 
-    # max coord (should be better)
+   #max coord (should be better)
     max_remoteness = [0] * len(feature_space)
     for crime_vector in crime_vectors:
         diff = [abs(i - j) for i, j in zip(crime_vector, center)]
@@ -59,26 +59,28 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
 
     print("classifying crime documents...")
     for document in documents_to_classify:
-        article_vector = tf_idf(feature_space, document, idf_vector)
+        article_vector = tf_normalize(feature_space, document)
+        #article_vector = tf_idf(feature_space, document, idf_vector)
         diff = [abs(i - j) for i, j in zip(article_vector, center)]
 
         #if dist_between(article_vector, center) < max_dist:
         if is_less(diff, max_remoteness):
             tp += 1
         else:
-            fp += 1
+            fn += 1
 
     documents_to_classify = not_crime_documents[learn_count:(learn_count + classify_count)]
     print("classifying not crime documents...")
     for document in documents_to_classify:
-        article_vector = tf_idf(feature_space, document, idf_vector)
+        article_vector = tf_normalize(feature_space, document)
+        #article_vector = tf_idf(feature_space, document, idf_vector)
         diff = [abs(i - j) for i, j in zip(article_vector, center)]
 
         #if dist_between(article_vector, center) >= max_dist:
         if not is_less(diff, max_remoteness):
             tn += 1
         else:
-            fn += 1
+            fp += 1
 
     print("TP: ", tp)
     print("FP: ", fp)
@@ -93,4 +95,4 @@ def naive(crime_documents, not_crime_documents, learn_count, classify_count, spa
     print("TPR: ", TPR)
     print("F-measure: ", 2*precision*TPR/(precision + TPR))
 
-naive(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count)
+#naive(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count)

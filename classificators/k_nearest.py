@@ -3,22 +3,21 @@ from sklearn.neighbors import KNeighborsClassifier
 from classificators.common import *
 
 
-def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count, space=400,):
-    print("k-nearest started")
+def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count, space=3000, k=3):
+    print("k-nearest started. k=" + str(k))
     crime_documents_to_learn = crime_documents[:learn_count]
     not_crime_documents_to_learn = not_crime_documents[:learn_count]
 
     # get words and their freq
-    counter = get_words_from(crime_documents_to_learn)
+    counter = get_words_from(crime_documents_to_learn + not_crime_documents_to_learn)
 
     print("make feature space...")
     i = 0
     feature_space = dict()
-    for (word, count) in counter.most_common(len(counter)):
+    for (word, count) in counter.most_common(space):
         feature_space[word] = i
         i += 1
 
-    print(feature_space)
 
     print("transforming documents into feature space...")
     crime_vectors = tf_all(feature_space, crime_documents_to_learn)
@@ -26,7 +25,7 @@ def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count,
 
     print("documents transformed successfully!")
 
-    classifier = KNeighborsClassifier(metric='euclidean')
+    classifier = KNeighborsClassifier(n_neighbors=k, p=50)
     X = []
     X.extend(crime_vectors)
     X.extend(not_crime_vectors)
@@ -50,7 +49,7 @@ def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count,
         if classifier.predict(np.array(article_vector).reshape(1, -1))[0] == 0:
             tp += 1
         else:
-            fp += 1
+            fn += 1
 
     documents_to_classify = not_crime_documents[learn_count:(learn_count + classify_count)]
     print("classifying not crime documents...")
@@ -60,19 +59,22 @@ def k_nearest(crime_documents, not_crime_documents, learn_count, classify_count,
         if classifier.predict(np.array(article_vector).reshape(1, -1))[0] != 0:
             tn += 1
         else:
-            fn += 1
+            fp += 1
 
     print("TP: ", tp)
     print("FP: ", fp)
     print("TN: ", tn)
     print("FN: ", fn)
 
-    precision = tp/(tp + fp)
-    TPR = tp/(tp + fn)
+    try:
+        precision = tp/(tp + fp)
+        TPR = tp/(tp + fn)
 
-    print("Precision: ", precision)
-    print("FPR: ", fp/(fp + tn))
-    print("TPR: ", TPR)
-    print("F-measure: ", 2*precision*TPR/(precision + TPR))
+        print("Precision: ", precision)
+        print("FPR: ", fp/(fp + tn))
+        print("TPR: ", TPR)
+        print("F-measure: ", 2*precision*TPR/(precision + TPR))
+    except Exception as e:
+        print("error")
 
-k_nearest(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count, 1000)
+#k_nearest(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count, 3000)

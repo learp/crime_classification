@@ -18,8 +18,8 @@ path_to_reuters = 'reuters21578'
 path_to_guardian_crimes = join('..', 'the_guardian_com', 'crimes')
 path_to_guardian_not_crimes = join('..', 'the_guardian_com', 'not_crimes')
 
-articles_learn_count = 100
-articles_classify_count = 7400
+articles_learn_count = 5000
+articles_classify_count = 5000
 
 
 def is_number(str):
@@ -40,7 +40,15 @@ def prepare_words_from(text):
              len(word) > 2]
 
     stemmer = PorterStemmer()
-    return [stemmer.stem(word) for word in words]
+    x = []
+
+    for word in words:
+        try:
+            x.append(stemmer.stem(word))
+        except Exception as e:
+            a = 1 + 1
+
+    return x
 
 
 def center_of_mass(points):

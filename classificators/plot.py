@@ -5,12 +5,31 @@ import classificators.common as cm
 import classificators.bayes as bayes
 import classificators.svm as svm
 import classificators.k_nearest as k_near
+import classificators.naive as nv
 
+learn = 100
+#svm.support_vector_machine(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
+# bayes.bayes(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=3)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=5)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=7)
+# nv.naive(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
 
-svm.support_vector_machine(cm.crime_articles, cm.not_crime_articles, 101, 8000, space=1000)
-bayes.bayes(cm.crime_articles, cm.not_crime_articles, 101, 8000, space=1000)
-k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, 101, 8000, space=1000)
+learn = 1000
+#svm.support_vector_machine(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
+# bayes.bayes(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=3)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=5)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=7)
+# nv.naive(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
 
+learn = 5000
+#svm.support_vector_machine(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
+# bayes.bayes(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=3)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=5)
+k_near.k_nearest(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000, k=7)
+# nv.naive(cm.crime_articles, cm.not_crime_articles, learn, cm.articles_classify_count, space=3000)
 
 # import some data to play with
 # iris = datasets.load_iris()

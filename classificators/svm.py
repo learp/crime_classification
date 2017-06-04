@@ -3,22 +3,20 @@ from sklearn import svm
 from classificators.common import *
 
 
-def support_vector_machine(crime_documents, not_crime_documents, learn_count, classify_count, space=400,):
+def support_vector_machine(crime_documents, not_crime_documents, learn_count, classify_count, space=3000):
     print("svm started")
     crime_documents_to_learn = crime_documents[:learn_count]
     not_crime_documents_to_learn = not_crime_documents[:learn_count]
 
     # get words and their freq
-    counter = get_words_from(crime_documents_to_learn + not_crime_documents)
+    counter = get_words_from(crime_documents_to_learn + not_crime_documents_to_learn)
 
     print("make feature space...")
     i = 0
     feature_space = dict()
-    for (word, count) in counter.most_common(len(counter)):
+    for (word, count) in counter.most_common(space):
         feature_space[word] = i
         i += 1
-
-    print(feature_space)
 
     print("transforming documents into feature space...")
     crime_vectors = tf_all(feature_space, crime_documents_to_learn)
@@ -26,7 +24,7 @@ def support_vector_machine(crime_documents, not_crime_documents, learn_count, cl
 
     print("documents transformed successfully!")
 
-    classifier = svm.SVC()
+    classifier = svm.SVC(kernel="linear")
     X = []
     X.extend(crime_vectors)
     X.extend(not_crime_vectors)
@@ -37,7 +35,10 @@ def support_vector_machine(crime_documents, not_crime_documents, learn_count, cl
     classifier.fit(X, Y)
     print("svm ready to classify!")
 
-    success_count = 0
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
     documents_to_classify = crime_documents[learn_count:(learn_count + classify_count)]
 
     print("classifying crime documents...")
@@ -45,19 +46,34 @@ def support_vector_machine(crime_documents, not_crime_documents, learn_count, cl
         article_vector = tf(feature_space, document)
 
         if classifier.predict(np.array(article_vector).reshape(1, -1))[0] == 0:
-            success_count += 1
+            tp += 1
+        else:
+            fn += 1
 
-    print(success_count / classify_count * 100)
-
-    success_count = 0
     documents_to_classify = not_crime_documents[learn_count:(learn_count + classify_count)]
     print("classifying not crime documents...")
     for document in documents_to_classify:
         article_vector = tf(feature_space, document)
 
         if classifier.predict(np.array(article_vector).reshape(1, -1))[0] != 0:
-            success_count += 1
+            tn += 1
+        else:
+            fp += 1
 
-    print(success_count / classify_count * 100)
+    print("TP: ", tp)
+    print("FP: ", fp)
+    print("TN: ", tn)
+    print("FN: ", fn)
 
-support_vector_machine(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count)
+    try:
+        precision = tp/(tp + fp)
+        TPR = tp/(tp + fn)
+
+        print("Precision: ", precision)
+        print("FPR: ", fp/(fp + tn))
+        print("TPR: ", TPR)
+        print("F-measure: ", 2*precision*TPR/(precision + TPR))
+    except Exception as e:
+        print("error")
+
+#support_vector_machine(crime_articles, not_crime_articles, articles_learn_count, articles_classify_count)
